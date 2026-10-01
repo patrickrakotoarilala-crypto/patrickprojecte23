@@ -1,0 +1,260 @@
+index.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lotto90 Madagascar</title>
+    <script src="https://socket.io"></script>
+    <style>
+        :root {
+            --gasy-red: #d32f2f;
+            --gasy-green: #388e3c;
+            --gasy-white: #ffffff;
+            --bg-dark: #121212;
+            --bg-card: #1c1c1c;
+            --wood: #4e342e;
+            --gold: #ffd700;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: #fff;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Lohateny ambony miloko hazo tahaka ny sary */
+        .barre-top {
+            background-color: var(--wood);
+            padding: 12px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 4px solid var(--gasy-green);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .titre-lalao { font-size: 20px; font-weight: bold; color: var(--gold); text-shadow: 1px 1px 2px #000; }
+        
+        .cagnotte-badge {
+            background-color: #212121;
+            padding: 8px 12px;
+            border-radius: 6px;
+            color: var(--gasy-green);
+            font-weight: bold;
+            border: 1px solid #333;
+        }
+
+        /* Fampisehoana ny baolina mivoaka mivantana */
+        .zone-boule {
+            background-color: #161616;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 2px solid #222;
+        }
+
+        .txt-quine { background-color: var(--gasy-green); color: #000; padding: 6px 12px; font-weight: bold; font-size: 14px; border-radius: 4px; }
+        .txt-plein { background-color: #ff9100; color: #000; padding: 6px 12px; font-weight: bold; font-size: 14px; border-radius: 4px; }
+
+        .boule-rng {
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #fff, #ff9100);
+            color: #000;
+            font-size: 28px;
+            font-weight: bold;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+
+        .layout-lehibe { padding: 15px; max-width: 480px; margin: 0 auto; }
+
+        /* Tontonana voadio tsara tarehy */
+        .box-pannel {
+            background-color: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-top: 4px solid var(--gasy-red);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+
+        .box-pannel h3 { margin-top: 0; color: var(--gold); border-bottom: 1px solid #333; padding-bottom: 8px; }
+
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 8px 0;
+            background: #262626;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+
+        input:focus { border-color: var(--gasy-green); }
+
+        button {
+            width: 95%;
+            padding: 14px;
+            background-color: var(--gasy-green);
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: 0.2s;
+        }
+
+        button:hover { opacity: 0.9; transform: scale(1.01); }
+        .btn-parier { background-color: var(--gasy-red); color: #fff; }
+        .btn-blue { background-color: #1565c0; color: #fff; }
+
+        /* Karatra Lotto90 Style (9 tsanganana tahaka ny sary) */
+        .grille-container {
+            background-color: #0d2112;
+            border: 3px solid var(--gasy-green);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .tsipika-9 { display: grid; grid-template-columns: repeat(9, 1fr); gap: 4px; margin-bottom: 4px; }
+        
+        .case-9 {
+            background-color: #1e1e1e;
+            padding: 12px 0;
+            font-weight: bold;
+            font-size: 16px;
+            text-align: center;
+            border-radius: 4px;
+            border: 1px solid #333;
+        }
+
+        .case-9.banga { background-color: #2c0c0c; border: none; }
+        .case-9.lany { background: radial-gradient(circle, #fff, var(--gasy-green)); color: #000; text-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div class="barre-top">
+        <div class="titre-lalao">🎰 LOTTO90 GASY</div>
+        <div class="cagnotte-badge">💼 <span id="lbl-solde">0</span> Ar</div>
+    </div>
+    <div class="barre-top" style="background-color:#2c1d1a; border:none; font-size:14px;">
+        <div id="lbl-anarana" style="color:#fff;">Kaonty Vahiny</div>
+        <div style="color:var(--gold);">🏆 Cagnotte: <span id="lbl-cagnotte">0</span> Ar</div>
+    </div>
+
+    <div class="zone-boule">
+        <div class="txt-quine">QUINE</div>
+        <div class="boule-rng" id="lbl-baolina">--</div>
+        <div class="txt-plein">PLEIN</div>
+    </div>
+
+    <div class="layout-lehibe">
+        
+        <!-- TONTONANA FISORATANA ANARANA -->
+        <div class="box-pannel" id="pan-auth">
+            <h3>Fisoratana Anarana / Inscription</h3>
+            <input type="text" id="in-pseudo" placeholder="Anaranao (Pseudo)">
+            <input type="text" id="in-phone" placeholder="Laharana Phone MVola (ex: 034...)">
+            <button onclick="connexion()">Iditra hilalao</button>
+        </div>
+
+        <!-- TONTONANA DEPOT SY RETRAIT MANUEL -->
+        <div class="box-pannel" id="pan-lalao" style="display:none;">
+            <h3>💰 Solfo sy Fifanakalozana (Manuel)</h3>
+            
+            <!-- Dépôt -->
+            <input type="number" id="in-depot" placeholder="Hafirimiana ny Dépôt (Ar)">
+            <button onclick="demandeDepot()">Hanao Dépôt MVola</button>
+            <p style="font-size:11px; color:#aaa; margin: 4px 0 15px 0;">*Alefaso manuel amin'ny Admin ny vola rehefa avy tsindrina io.</p>
+
+            <!-- Retrait -->
+            <input type="number" id="in-retrait" placeholder="Hafirimiana ny Retrait (Ar)">
+            <button onclick="demandeRetrait()" class="btn-blue">Hanao Retrait MVola</button>
+            
+            <hr style="border-color:#333; margin:20px 0;">
+            
+            <h3>🎟️ Hividy Karatra (200 Ar / Unité)</h3>
+            <input type="number" id="in-qty" placeholder="Karatra firy? (Max 6)" max="6" min="1">
+            <button onclick="acheter()" class="btn-parier">Parier / Hividy Karatra</button>
+        </div>
+
+        <div id="zone-mes-grilles"></div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3000');
+        let monPhone = "", mesCartes = [];
+
+        socket.on('game-info', (data) => { document.getElementById('lbl-cagnotte').innerText = data.jackpot; });
+        socket.on('update-jackpot', (data) => { document.getElementById('lbl-cagnotte').innerText = data.jackpot; });
+        socket.on('number-drawn', (data) => {
+            document.getElementById('lbl-baolina').innerText = data.number;
+            actualiserGrillesDisplay(data.history);
+        });
+
+        socket.on('game-over', (data) => {
+            alert("🚨 LOTO TAPITRA! Nisy nahazo! Mpilalao: " + data.winner + ". Ny Admin dia handefa ny lokanao Manuel amin'ny MVola.");
+        });
+
+        socket.on('game-reset', (data) => {
+            alert(data.message);
+            document.getElementById('lbl-baolina').innerText = "--";
+            document.getElementById('zone-mes-grilles').innerHTML = "";
+            document.getElementById('lbl-cagnotte').innerText = "0";
+        });
+
+        // Fampandrenesana avy amin'ny Admin rehefa nekena ny Dépôt/Retrait
+        socket.on('maj-solde-joueur', (data) => {
+            if(data.phone === monPhone) {
+                document.getElementById('lbl-solde').innerText = data.balance;
+            }
+        });
+
+        function connexion() {
+            const pseudo = document.getElementById('in-pseudo').value;
+            const phone = document.getElementById('in-phone').value;
+            if(!pseudo || !phone) return alert("Fenoy ny form!");
+
+            fetch('http://localhost:3000/api/inscription', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pseudo, phone })
+            }).then(res => res.json()).then(data => {
+                if(data.success) {
+                    monPhone = phone;
+                    document.getElementById('lbl-anarana').innerText = "👤 " + pseudo + " (" + phone + ")";
+                    document.getElementById('lbl-solde').innerText = data.balance;
+                    document.getElementById('pan-auth').style.display = 'none';
+                    document.getElementById('pan-lalao').style.display = 'block';
+                }
+            });
+        }
+
+        function demandeDepot() {
+            const mnt = document.getElementById('in-depot').value;
+            if(!mnt || mnt < 200) return alert("200 Ar raha kely indrindra!");
+            // Mandefa fampandrenesana any amin'ny Admin
+            socket.emit('demande-depot-admin', { phone: monPhone, montant: mnt });
+            alert("Nalefa ny fangatahana dépôt! Alefaso amin'ny findain'i Patrick Admin ny vola izao.");
+        }
+
+        function demandeRetrait() {
+            const mnt = document.getElementById('in-retrait').value;
+            if(!mnt) return alert("Ampidiro ny vola tiana ho lany!");
