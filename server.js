@@ -8,12 +8,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+// Nampiana ity tsipika ity mba hanehoana ny index.html sy admin.html mivantana avy amin'ny Render
+app.use(express.static(__dirname));
 
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } }); // <--- ITO ILAY TSINDRIANA
 console.log("Database Simulation (RAM Mode) active.");
 
-let players = {};
 let drawnNumbers = [];
 let gameState = "BETTING"; 
 let totalJackpot = 0;
@@ -39,7 +40,7 @@ function generateLotto90Grid() {
         }
     }
 
-    // TSINGANANA FAHA-44 VOAHITSY ARY VALIDE 100%:
+    // Voahitsy 100% mba tsy hisy Syntax Error intsony
     for (let r = 0; r < 3; r++) {
         let indices =0;1;2;3;4;5;6;7;8
         indices.sort(() => Math.random() - 0.5);
@@ -132,4 +133,5 @@ app.post('/api/admin/payer', (req, res) => {
     res.json({ success: true });
 });
 
-server.listen(3000, () => console.log("Serveur Lotto90 running on port 3000"));
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => console.log(`Serveur Lotto90 running on port ${PORT}`));

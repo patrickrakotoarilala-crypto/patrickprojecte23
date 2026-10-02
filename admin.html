@@ -3,173 +3,72 @@ admin.html
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Lotto90</title>
     <script src="https://socket.io"></script>
     <style>
-        :root {
-            --gasy-red: #d32f2f;
-            --gasy-green: #388e3c;
-            --bg-dark: #121212;
-            --bg-card: #1c1c1c;
-            --wood: #4e342e;
-            --gold: #ffd700;
-        }
-
-        body { 
-            font-family: 'Segoe UI', Arial, sans-serif; 
-            background-color: var(--bg-dark); 
-            color: #fff; 
-            text-align: center; 
-            padding: 20px; 
-        }
-
-        /* Tsipika ambony miloko hazo tahaka ny sary */
-        .pannel { 
-            background-color: var(--bg-card); 
-            max-width: 550px; 
-            margin: 20px auto; 
-            padding: 25px; 
-            border-radius: 12px; 
-            border-top: 6px solid var(--gasy-green);
-            border-bottom: 6px solid var(--wood);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6); 
-        }
-
-        h2 { color: var(--gold); margin-top: 0; text-transform: uppercase; text-shadow: 1px 1px 2px #000; }
-        
-        /* Bokotra mavo lehibe hitarihana baolina */
-        button { 
-            width: 95%; 
-            padding: 16px; 
-            font-size: 16px; 
-            font-weight: bold; 
-            background: linear-gradient(180deg, #ffcc00, #ff9100);
-            color: #000; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            text-transform: uppercase; 
-            margin-bottom: 15px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-            transition: 0.2s;
-        }
-
-        button:hover { transform: scale(1.01); opacity: 0.9; }
-        
-        .btn-action { background: var(--gasy-green); color: #fff; width: auto; padding: 10px 20px; font-size: 14px; margin: 5px; border-radius: 4px; }
-        .btn-refuse { background: #1565c0; color: #fff; width: auto; padding: 10px 20px; font-size: 14px; margin: 5px; border-radius: 4px; }
-        
-        .box-list { background-color: #262626; padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; border-left: 5px solid var(--gold); }
-        .box-list h3 { margin-top: 0; color: #fff; font-size: 16px; border-bottom: 1px solid #444; padding-bottom: 5px; }
-
-        .alert-box { background-color: #2c0c0c; border: 2px solid var(--gasy-red); padding: 15px; border-radius: 8px; margin-top: 20px; display: none; text-align: left; }
-        .highlight { color: var(--gasy-green); font-weight: bold; font-size: 18px; }
+        body { font-family: Arial, sans-serif; background-color: #121212; color: #fff; text-align: center; padding: 20px; }
+        .pannel { background-color: #1c1c1c; max-width: 500px; margin: 20px auto; padding: 25px; border-radius: 8px; border: 2px solid #ff9100; }
+        button { width: 95%; padding: 15px; background-color: #ff9100; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .btn-action { background-color: #00e676; padding: 6px 12px; margin: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .box-list { background-color: #262626; padding: 15px; border-radius: 6px; text-align: left; margin-top: 15px; border-left: 4px solid #ff9100; }
+        .alert-box { background-color: #2c0c0c; border: 2px solid #ff1744; padding: 15px; border-radius: 8px; margin-top: 20px; display: none; text-align: left; }
     </style>
 </head>
 <body>
-
     <div class="pannel">
         <h2>🔧 DASHBOARD ADMIN - PATRICK</h2>
-        <p style="color: #aaa; font-size: 14px;">Laharana Admin Marchand: <b style="color: var(--gold);">034 18 303 22</b></p>
-        <hr style="border-color:#333; margin:20px 0;">
-        
-        <!-- BOKOTRA HITARIHANA BAOLINA -->
+        <p>Laharana Admin: <b>0341830322</b></p>
+        <hr style="border-color:#333;">
         <button onclick="tirerBoule()">🔴 HITARI-TSIRA BAOLINA (RNG)</button>
-        
-        <!-- DÉPÔT MANUEL LIST -->
         <div class="box-list">
-            <h3>📥 Fangatahana Dépôt Mvola (Manuel)</h3>
-            <div id="liste-depots"><p style="color:#777; font-size: 14px;">Tsy misy fangatahana aloha izao...</p></div>
+            <h3>📥 Fangatahana Dépôt Mvola</h3>
+            <div id="liste-depots"><p style="color:#777;">Tsy misy fangatahana aloha izao...</p></div>
         </div>
-
-        <!-- RETRAIT MANUEL LIST -->
-        <div class="box-list" style="border-left-color: #1565c0;">
-            <h3>📤 Fangatahana Retrait Mvola (Manuel)</h3>
-            <div id="liste-retraits"><p style="color:#777; font-size: 14px;">Tsy misy fangatahana aloha izao...</p></div>
-        </div>
-        
-        <!-- ALERTE REHEFA MISY MAHAZO -->
         <div class="alert-box" id="box-alerte">
-            <h3 style="margin:0; color: var(--gasy-red);">🚨 ALERTE: MISY NAHAZO LALAO!</h3>
-            <p>Mpilalao: <span id="gagnant-name" class="highlight">-</span> (<span id="gagnant-phone">-</span>)</p>
-            <p>Vola halefa (40%): <span id="gagnant-gain" style="color: var(--gold); font-weight:bold; font-size: 20px;">0</span> Ar</p>
-            <hr style="border-color: #444;">
-            <p style="font-size:12px; color:#aaa; margin-bottom: 12px;">*Alefaso amin'ny findainao manuel ny MVola ho an'io laharana io, avy eo tsindrio ity bokotra ity:</p>
-            <button onclick="validerFinLalao()" style="background: var(--gasy-red); color:#fff; width: 100%;">Hanaiky & Hamerina Lalao ho 0</button>
+            <h3 style="color:#ff1744;">🚨 ALERTE: MISY NAHAZO!</h3>
+            <p>Mpilalao: <span id="gagnant-name" style="color:#00e676; font-weight:bold;">-</span></p>
+            <p>Vola halefa (40%): <span id="gagnant-gain" style="color:#ffeb3b; font-weight:bold;">0</span> Ar</p>
+            <button onclick="validerFinLalao()" style="background-color:#d32f2f; color:#fff;">Hanaiky & Hamerina Lalao ho 0</button>
         </div>
     </div>
-
     <script>
-        const socket = io('http://localhost:3000');
+        const socket = io(); // Natao banga mandeha ho azy
         let laharanaGagnant = "";
-
-        socket.on('game-info', (data) => { });
 
         socket.on('game-over', (data) => {
             laharanaGagnant = data.phone;
             document.getElementById('gagnant-name').innerText = data.winner;
-            document.getElementById('gagnant-phone').innerText = data.phone;
             document.getElementById('gagnant-gain').innerText = (data.jackpot * 0.40) + " Ar";
             document.getElementById('box-alerte').style.display = 'block';
         });
 
-        // Rehefa misy mpilalao mangataka Dépôt
         socket.on('recevoir-depot-admin', (data) => {
             const zone = document.getElementById('liste-depots');
             if(zone.innerHTML.includes("Tsy misy")) zone.innerHTML = "";
-            zone.innerHTML += `<div id="dep-${data.phone}" style="margin-bottom:10px; border-bottom:1px solid #444; padding-bottom:5px; font-size:15px;">
-                Mpilalao: <b>${data.phone}</b> mangataka <b class="highlight">${data.montant} Ar</b> <br>
-                <button class="btn-action" onclick="accepterDepot('${data.phone}', ${data.montant})">Naray ny Vola (Accepter)</button>
+            zone.innerHTML += `<div id="dep-${data.phone}" style="margin-bottom:10px; border-bottom:1px solid #444;">
+                Mpilalao: <b>${data.phone}</b> (${data.montant} Ar) 
+                <button class="btn-action" onclick="accepterDepot('${data.phone}', ${data.montant})">Accepter</button>
             </div>`;
         });
 
-        // Rehefa misy mpilalao mangataka Retrait
-        socket.on('recevoir-retrait-admin', (data) => {
-            const zone = document.getElementById('liste-retraits');
-            if(zone.innerHTML.includes("Tsy misy")) zone.innerHTML = "";
-            zone.innerHTML += `<div id="ret-${data.phone}" style="margin-bottom:10px; border-bottom:1px solid #444; padding-bottom:5px; font-size:15px;">
-                Mpilalao: <b>${data.phone}</b> mangataka <b style="color: var(--gold);">${data.montant} Ar</b> <br>
-                <button class="btn-refuse" onclick="accepterRetrait('${data.phone}', ${data.montant})">Efa Nalefako ny MVola (Accepter)</button>
-            </div>`;
-        });
-
-        function tirerBoule() {
-            fetch('http://localhost:3000/api/loto/tirage', { method: 'POST' });
-        }
-
+        function tirerBoule() { fetch('/api/loto/tirage', { method: 'POST' }); }
+        
         function accepterDepot(phone, montant) {
-            fetch('http://localhost:3000/api/depot', {
+            fetch('/api/depot', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phone, montant: montant })
+                body: JSON.stringify({ phone, montant })
             }).then(() => {
-                const element = document.getElementById(`dep-${phone}`);
-                if(element) element.remove();
-                socket.emit('maj-solde-force', { phone: phone });
+                document.getElementById(`dep-${phone}`).remove();
+                socket.emit('maj-solde-force', { phone });
             });
         }
-
-        function accepterRetrait(phone, montant) {
-            fetch('http://localhost:3000/api/depot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ phone: phone, montant: -montant })
-            }).then(() => {
-                const element = document.getElementById(`ret-${phone}`);
-                if(element) element.remove();
-                socket.emit('maj-solde-force', { phone: phone });
-            });
-        }
-
         function validerFinLalao() {
-            fetch('http://localhost:3000/api/admin/payer', {
+            fetch('/api/admin/payer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ joueurPhone: laharanaGagnant })
-            }).then(() => {
-                document.getElementById('box-alerte').style.display = 'none';
-            });
+            }).then(() => { document.getElementById('box-alerte').style.display = 'none'; });
         }
     </script>
 </body>
